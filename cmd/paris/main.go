@@ -17,7 +17,7 @@ import (
 func main() {
 
   logger := logrus.New().WithField("version", version.Version)
-  logger.Info("Application starting, Commit %s, Build Time %s", version.Commit, version.BuildTime)
+  logger.Infof("Application starting, Commit %v, Build Time %v", version.Commit, version.BuildTime)
   port := os.Getenv("PORT")
   if port == "" {
     logger.Fatal("Business logic port is not set (PORT)")
@@ -35,7 +35,7 @@ func main() {
   diagRouter := mux.NewRouter()
   // health check
   diagRouter.HandleFunc("/health",func(w http.ResponseWriter, _ *http.Request){
-    //logger.Infof("health received")
+    logger.Info("health received")
     w.WriteHeader(http.StatusOK)
   })
   // readiness
@@ -49,12 +49,15 @@ func main() {
   }
 
   go func() {
-    logger.Info("Business logic server preparing...")
-    server.ListenAndServe()
+    logger.Infof("Business logic server preparing...")
+    err := server.ListenAndServe()
+    logger.Errorf("error %v",err)
   }()
   go func() {
-    logger.Info("Diagnostic server preparing...")
-    diag.ListenAndServe()
+    logger.Infof("Diagnostic server preparing...")
+    err := diag.ListenAndServe()
+    logger.Errorf("error %v",err)
+
   }()
 
 
@@ -65,5 +68,6 @@ func main() {
   logger.Infof("Received %v. Application stopped",x)
   timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
   defer cancelFunc()
-  diag.Shutdown(timeout)
+  err := diag.Shutdown(timeout)
+  logger.Errorf("error %v",err)
 }

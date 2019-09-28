@@ -9,13 +9,13 @@ $ go build -o parisApp cmd/paris/main.go
 With the makefile (recommended)
 
 ```
-make build
+$ make build
 ```
 
 then launch the binary
 
 ```
-./bin/paris
+$ ./bin/paris
 ```
 
 ## Run the application
@@ -50,5 +50,15 @@ kill -INT 1234
 Where 1234 is the process number
 
 
-# Versioning
+# Version
 
+Handled via build flags (see `Makefile`)
+
+
+# Testing
+
+Dockerfile.test can be used to perform checks (linter, test) :
+
+```
+$ docker build -test -f Dockerfile.test .
+```
