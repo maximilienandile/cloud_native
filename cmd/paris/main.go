@@ -4,9 +4,13 @@ import (
   "net/http"
 
   "github.com/gorilla/mux"
+  "github.com/sirupsen/logrus"
 )
 
 func main() {
+
+  logger := logrus.New()
+  logger.Info("Application starting")
 
   r := mux.NewRouter()
   server := http.Server{
@@ -19,8 +23,10 @@ func main() {
   }
 
   go func() {
+    logger.Info("Business logic server preparing...")
     server.ListenAndServe()
   }()
+  logger.Info("Diagnostic server preparing...")
 
   diag.ListenAndServe()
 }
