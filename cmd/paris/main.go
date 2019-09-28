@@ -4,6 +4,8 @@ import (
   "net"
   "net/http"
   "os"
+  "os/signal"
+  "syscall"
 
   "github.com/gorilla/mux"
   "github.com/sirupsen/logrus"
@@ -41,6 +43,12 @@ func main() {
     server.ListenAndServe()
   }()
   logger.Info("Diagnostic server preparing...")
-
   diag.ListenAndServe()
+
+
+  // graceful shutdown
+  interrupt := make(chan os.Signal,1)
+  signal.Notify(interrupt,os.Interrupt,syscall.SIGTERM)
+  x:= <- interrupt
+  logger.Infof("Received %v. Application stopped",x)
 }
