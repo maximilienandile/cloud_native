@@ -62,3 +62,11 @@ Dockerfile.test can be used to perform checks (linter, test) :
 ```
 $ docker build -test -f Dockerfile.test .
 ```
+
+# Building a docker image
+
+With a multi-stage docker file :
+
+```
+$ docker build -t paris -f Dockerfile .
+```
