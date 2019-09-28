@@ -1,11 +1,14 @@
 package main
 
 import (
+  "context"
+  "github.com/maximilienandile/cloud_native/internal/version"
   "net"
   "net/http"
   "os"
   "os/signal"
   "syscall"
+  "time"
 
   "github.com/gorilla/mux"
   "github.com/sirupsen/logrus"
@@ -13,8 +16,8 @@ import (
 
 func main() {
 
-  logger := logrus.New()
-  logger.Info("Application starting")
+  logger := logrus.New().WithField("version", version.Version)
+  logger.Info("Application starting, Commit %s, Build Time %s", version.Commit, version.BuildTime)
   port := os.Getenv("PORT")
   if port == "" {
     logger.Fatal("Business logic port is not set (PORT)")
@@ -30,7 +33,14 @@ func main() {
   }
 
   diagRouter := mux.NewRouter()
+  // health check
   diagRouter.HandleFunc("/health",func(w http.ResponseWriter, _ *http.Request){
+    //logger.Infof("health received")
+    w.WriteHeader(http.StatusOK)
+  })
+  // readiness
+  diagRouter.HandleFunc("/ready",func(w http.ResponseWriter, _ *http.Request){
+    logger.Infof("ready received")
     w.WriteHeader(http.StatusOK)
   })
   diag := http.Server{
@@ -42,8 +52,10 @@ func main() {
     logger.Info("Business logic server preparing...")
     server.ListenAndServe()
   }()
-  logger.Info("Diagnostic server preparing...")
-  diag.ListenAndServe()
+  go func() {
+    logger.Info("Diagnostic server preparing...")
+    diag.ListenAndServe()
+  }()
 
 
   // graceful shutdown
@@ -51,4 +63,7 @@ func main() {
   signal.Notify(interrupt,os.Interrupt,syscall.SIGTERM)
   x:= <- interrupt
   logger.Infof("Received %v. Application stopped",x)
+  timeout, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+  defer cancelFunc()
+  diag.Shutdown(timeout)
 }
