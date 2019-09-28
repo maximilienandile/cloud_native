@@ -1,6 +1,7 @@
 package main
 
 import (
+  "net"
   "net/http"
   "os"
 
@@ -22,12 +23,17 @@ func main() {
   }
   r := mux.NewRouter()
   server := http.Server{
-    Addr:    ":"+port,
+    Addr:    net.JoinHostPort("",port),
     Handler: r,
   }
 
+  diagRouter := mux.NewRouter()
+  diagRouter.HandleFunc("/health",func(w http.ResponseWriter, _ *http.Request){
+    w.WriteHeader(http.StatusOK)
+  })
   diag := http.Server{
-    Addr: ":"+diagPort,
+    Addr: net.JoinHostPort("",diagPort),
+    Handler:diagRouter,
   }
 
   go func() {
