@@ -6,6 +6,18 @@
 $ go build -o parisApp cmd/paris/main.go
 ```
 
+With the makefile (recommended)
+
+```
+make build
+```
+
+then launch the binary
+
+```
+./bin/paris
+```
+
 ## Run the application
 
 ```
@@ -16,7 +28,6 @@ To check the health of the application
 ```
 $ curl -i http://localhost:8081/health
 ```
-
 ## Configuration
 
 * `PORT` : application port
